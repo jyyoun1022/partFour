@@ -9,6 +9,7 @@ import partFour.youn.entity.Member;
 import partFour.youn.entity.Movie;
 import partFour.youn.entity.Review;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -36,5 +37,23 @@ public class ReviewRepositoryTests {
 
             repository.save(movieReview);
         });
+    }
+    @Test
+    void test(){
+        Movie movie = Movie.builder().mno(92L).build();
+
+        List<Review> result = repository.findByMovie(movie);
+
+        result.forEach(movieReview ->{
+            System.out.print(movieReview.getReviewNum());
+            System.out.print("\t" + movieReview.getGrade());
+            System.out.print("\t" + movieReview.getText());
+            System.out.print("\t" + movieReview.getMember().getEmail());
+            System.out.println("===================================");
+        });
+    }
+    @Test
+    void testDelete(){
+
     }
 }
