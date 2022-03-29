@@ -16,36 +16,38 @@
             crossorigin="anonymous"></script>>
 
     <script>
-
-        $(".uploadBtn").click(function(){
+       $('.uploadBtn').click(function( ) {
 
             var formData = new FormData();
+
             var inputFile = $("input[type='file']");
+
             var files = inputFile[0].files;
 
-            for(var i=0; i<files.length; i++){
+            for (var i = 0; i < files.length; i++) {
                 console.log(files[i]);
-                formData.append("uploadFiles",files[i]);
+                formData.append("uploadFiles", files[i]);
             }
 
-            $.ajax({
-                url: '/uploadAjax',
-                processData: false,
-                contentType: false,
-                data: formData,
-                type: 'POST',
-                dataType:'json',
-                success: function(result){
+           //실제 업로드 부분
+           //upload ajax
+          $.ajax({
+               url: '/uploadAjax',
+               processData: false,
+               contentType: false,
+               data: formData,
+               type: 'POST',
+               dataType:'json',
+               success: function(result){
+                   //나중에 화면 처리
+                   showUploadedImage(result);
+               },
+               error: function(jqXHR, textStatus, errorThrown){
+                   console.log(textStatus);
+               }
 
-                    showUploadImages(result);
-                      console.log(result);
-                },
-                error:function(jqXHR, textStatus, errorThrown){
-                    console.log(textStatus);
-                }
-            });
-
-        });
+           }); //$.ajax
+       });
 
         function showUploadImages(arr){
             console.log(arr);

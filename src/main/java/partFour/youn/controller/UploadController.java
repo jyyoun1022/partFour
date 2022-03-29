@@ -35,63 +35,76 @@ public class UploadController {
 
 
     @PostMapping("/uploadAjax")
-    public  ResponseEntity<List<UploadResultDTO>> uploadFile(MultipartFile[] uploadFiles){
+    public ResponseEntity<List<UploadResultDTO>> uploadFile(MultipartFile[] uploadFiles) {
 
         List<UploadResultDTO> resultDTOList = new ArrayList<>();
 
 
         for (MultipartFile uploadFile : uploadFiles) {
 
-            if(uploadFile.getContentType().startsWith("image")== false){
-                log.warn("this is not image type");
+            // 이미지 파일만 업로드 가능
+            if(uploadFile.getContentType().startsWith("image") == false){
+                // 이미지가 아닌경우 403 Forbidden 반환
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
 
+            // 실제 파일 이름 IE나 Edge는 전체 경로가 들어오므로
             String originalName = uploadFile.getOriginalFilename();
+
             String fileName = originalName.substring(originalName.lastIndexOf("\\") + 1);
 
-            System.out.println("fileName = " + fileName);
+            log.info("fileName: "+fileName);
 
-            //날짜 폴더생성
+            // 날짜 폴더 생성
             String folderPath = makeFolder();
 
             //UUID
             String uuid = UUID.randomUUID().toString();
 
-            //저장할 파일 이름 중간에 "_"를 이용해서 구분
-            String saveName = uploadPath + File.separator+folderPath+File.separator+uuid+"_"+fileName;
+            //저장할 파일 이름
+            String saveName = uploadPath + File.separator + folderPath + File.separator + uuid +"_"+ fileName;
 
-            Path savePath = Paths.get(saveName);//경로 정의하기
-            try{
-                uploadFile.transferTo(savePath);//선택한 파일들을 savePath에 저장합니다.
+            Path savePath = Paths.get(saveName);
 
-                String thumbnailSaveName = uploadPath+File.separator+folderPath+File.separator+"s_"+uuid+"_"+fileName;
+            try {
+                //원본 파일 저장
+                uploadFile.transferTo(savePath);
 
+                //섬네일 생성 (섬네일 파일 이름은 중간에 "s_"로 시작하도록)
+                String thumbnailSaveName = uploadPath + File.separator + folderPath + File.separator
+                        + "s_" + uuid +"_"+ fileName;
                 File thumbnailFile = new File(thumbnailSaveName);
 
-                Thumbnailator.createThumbnail(savePath.toFile(),thumbnailFile,100,100);
+                Thumbnailator.createThumbnail(savePath.toFile(), thumbnailFile,100,100);
+
                 resultDTOList.add(new UploadResultDTO(fileName,uuid,folderPath));
-
-
             }catch (IOException e){
                 e.printStackTrace();
             }
         }
-        return new ResponseEntity<>(resultDTOList,HttpStatus.OK);
+
+        return new ResponseEntity<>(resultDTOList, HttpStatus.OK);
     }
+
+
     private String makeFolder(){
+
         String str = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
         String folderPath = str.replace("/", File.separator);
 
-        File uploadPathFolder = new File(uploadPath, folderPath);
+        //make folder -------
+        File uploadPathFolder = new File(uploadPath,folderPath);
 
-        if(uploadPathFolder.exists() == false){
-            log.info("mkdirs가 실행되엇습니다.");
+        if(uploadPathFolder.exists()  == false) {
             uploadPathFolder.mkdirs();
         }
         return folderPath;
     }
 
+
+    /** 업로드 이미지 출력하기
+     */
     @GetMapping("/display")
     public ResponseEntity<byte[]> getFile(String fileName,String size){
 
@@ -122,6 +135,9 @@ public class UploadController {
         }
         return  result;
     }
+
+    /** 업로드 파일 삭제
+     */
     @PostMapping("/removeFile")
     public ResponseEntity<Boolean> removeFile(String fileName){
 
@@ -129,20 +145,18 @@ public class UploadController {
 
         try{
             srcFileName = URLDecoder.decode(fileName,"UTF-8");
-            File file = new File(uploadPath+ File.separator+srcFileName);
+            //UUID가 포함된 파일이름을 디코딩해줍니다.
+            File file = new File(uploadPath +File.separator + srcFileName);
             boolean result = file.delete();
 
-            log.info("getParent(): "+file.getParent());
-            log.info("getName(): "+file.getName());
-
             File thumbnail = new File(file.getParent(),"s_"+file.getName());
-
+            //getParent() - 현재 File 객체가 나태내는 파일의 디렉토리의 부모 디렉토리의 이름 을 String으로 리턴해준다.
             result = thumbnail.delete();
-
             return new ResponseEntity<>(result,HttpStatus.OK);
         }catch (UnsupportedEncodingException e){
             e.printStackTrace();
             return new ResponseEntity<>(false,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

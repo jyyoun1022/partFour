@@ -55,6 +55,7 @@ public interface MovieService {
 
         List<MovieImageDTO>movieImageDTOList = movieImages.stream().map(movieImage->{
             MovieImageDTO movieImageDTO = MovieImageDTO.builder()
+                    .imgName(movieImage.getImgName())
                     .path(movieImage.getPath())
                     .uuid(movieImage.getUuid())
                     .build();
