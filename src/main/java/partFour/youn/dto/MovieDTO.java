@@ -1,10 +1,11 @@
-package partFour.youn.entity.dto;
+package partFour.youn.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,4 +21,10 @@ public class MovieDTO {
 
     @Builder.Default
     private List<MovieImageDTO> imageDTOList = new ArrayList<>();
+
+    private double avg;
+
+    private int reviewCount;
+
+    private LocalDateTime regDate,modDate;
 }

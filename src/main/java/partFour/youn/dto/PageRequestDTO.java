@@ -1,4 +1,4 @@
-package partFour.youn.entity.dto;
+package partFour.youn.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

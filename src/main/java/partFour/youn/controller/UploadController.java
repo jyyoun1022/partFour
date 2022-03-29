@@ -1,6 +1,5 @@
-package partFour.youn.entity.controller;
+package partFour.youn.controller;
 
-import lombok.extern.java.Log;
 import lombok.extern.log4j.Log4j2;
 import net.coobird.thumbnailator.Thumbnailator;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import partFour.youn.entity.dto.UploadResultDTO;
+import partFour.youn.dto.UploadResultDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,26 +93,34 @@ public class UploadController {
     }
 
     @GetMapping("/display")
-    public ResponseEntity<byte[]>getFile(String fileName){
+    public ResponseEntity<byte[]> getFile(String fileName,String size){
 
         ResponseEntity<byte[]> result = null;
 
-
         try{
             String srcFileName = URLDecoder.decode(fileName,"UTF-8");
-            log.info("fileName22: "+srcFileName);
-            File file = new File(uploadPath+File.separator+srcFileName);
-
-            log.info("file22: "+file);
+            //URL 인코딩된 파일 이름을 디코딩
+            log.info("filName : "+srcFileName);
+            File file = new File(uploadPath + File.separator + srcFileName);
+            if(size != null && size.equals("1")){
+                file = new File(file.getParent(),file.getName().substring(2));
+            }
+            // 해당 URL의 파일을 생성
+            log.info("File : "+file);
 
             HttpHeaders header = new HttpHeaders();
-            header.add("Content-Type", Files.probeContentType(file.toPath()));
+
+            //File객체를 Path로 변환하여 MIME 타입을 판단하여 HTTPHeaders의 Content-Type에  값으로 들어갑니다.
+            header.add("Content-Type",Files.probeContentType(file.toPath()));
+
+            //파일 데이터 처리
             result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file),header,HttpStatus.OK);
-        }catch (Exception e){
+
+        }catch(Exception e){
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return result;
+        return  result;
     }
     @PostMapping("/removeFile")
     public ResponseEntity<Boolean> removeFile(String fileName){

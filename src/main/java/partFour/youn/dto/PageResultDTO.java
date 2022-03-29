@@ -1,4 +1,4 @@
-package partFour.youn.entity.dto;
+package partFour.youn.dto;
 
 import lombok.Data;
 import org.springframework.data.domain.Page;
